@@ -1,12 +1,12 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
-import 'package:card_swiper/card_swiper.dart';
 import 'package:go_router/go_router.dart';
 import '../../core/theme/app_colors.dart';
 import '../../models/user_model.dart';
 import '../../providers/auth_provider.dart';
 import '../../services/supabase/swipe_service.dart';
 import '../../widgets/swipe_card.dart';
+import '../../widgets/draggable_swipe_card.dart';
 
 // Provider para lista de usuários
 final potentialMatchesProvider = FutureProvider<List<UserModel>>((ref) async {
@@ -26,8 +26,9 @@ class SwipeScreen extends ConsumerStatefulWidget {
 
 class _SwipeScreenState extends ConsumerState<SwipeScreen> {
   final SwipeService _swipeService = SwipeService();
-  final SwiperController _swiperController = SwiperController();
+  final DraggableSwipeCardController _cardController = DraggableSwipeCardController();
   
+  int _currentIndex = 0; // Índice do card atual
   bool _isProcessing = false;
 
   Future<void> _handleSwipe(UserModel user, String direction) async {
@@ -55,6 +56,36 @@ class _SwipeScreenState extends ConsumerState<SwipeScreen> {
     }
 
     setState(() => _isProcessing = false);
+  }
+  
+  /// Handler para swipe do card arrastável
+  void _onCardSwiped(SwipeDirection direction, List<UserModel> users) {
+    if (_currentIndex >= users.length) return;
+    
+    final user = users[_currentIndex];
+    String swipeType;
+    
+    switch (direction) {
+      case SwipeDirection.left:
+        swipeType = 'nope';
+        break;
+      case SwipeDirection.right:
+        swipeType = 'like';
+        break;
+      case SwipeDirection.up:
+        swipeType = 'super_like';
+        break;
+      case SwipeDirection.none:
+        return;
+    }
+    
+    // Incrementar índice para próximo card
+    setState(() {
+      _currentIndex++;
+    });
+    
+    // Processar swipe
+    _handleSwipe(user, swipeType);
   }
 
   void _showMatchDialog(UserModel matchedUser) {
@@ -197,19 +228,72 @@ class _SwipeScreenState extends ConsumerState<SwipeScreen> {
             children: [
               // Cards Stack
               Expanded(
-                child: Swiper(
-                  controller: _swiperController,
-                  itemCount: users.length,
-                  itemBuilder: (context, index) {
-                    return SwipeCard(user: users[index]);
-                  },
-                  onIndexChanged: (index) {
-                    // Card changed
-                  },
-                  layout: SwiperLayout.STACK,
-                  itemWidth: MediaQuery.of(context).size.width * 0.9,
-                  itemHeight: MediaQuery.of(context).size.height * 0.65,
-                  loop: false,
+                child: Center(
+                  child: SizedBox(
+                    width: MediaQuery.of(context).size.width * 0.9,
+                    height: MediaQuery.of(context).size.height * 0.65,
+                    child: _currentIndex >= users.length
+                        ? Center(
+                            child: Column(
+                              mainAxisAlignment: MainAxisAlignment.center,
+                              children: [
+                                Icon(
+                                  Icons.check_circle_outline,
+                                  size: 80,
+                                  color: AppColors.success.withOpacity(0.5),
+                                ),
+                                const SizedBox(height: 16),
+                                Text(
+                                  'Você viu todos!',
+                                  style: Theme.of(context).textTheme.headlineSmall,
+                                ),
+                                const SizedBox(height: 8),
+                                Text(
+                                  'Volte mais tarde para novos perfis',
+                                  style: Theme.of(context).textTheme.bodyMedium?.copyWith(
+                                        color: AppColors.textSecondary,
+                                      ),
+                                ),
+                              ],
+                            ),
+                          )
+                        : Stack(
+                            children: [
+                              // Card 2 atrás (background)
+                              if (_currentIndex + 2 < users.length)
+                                Positioned.fill(
+                                  child: Padding(
+                                    padding: const EdgeInsets.only(top: 16),
+                                    child: Opacity(
+                                      opacity: 0.3,
+                                      child: SwipeCard(user: users[_currentIndex + 2]),
+                                    ),
+                                  ),
+                                ),
+                              
+                              // Card 1 atrás
+                              if (_currentIndex + 1 < users.length)
+                                Positioned.fill(
+                                  child: Padding(
+                                    padding: const EdgeInsets.only(top: 8),
+                                    child: Opacity(
+                                      opacity: 0.6,
+                                      child: SwipeCard(user: users[_currentIndex + 1]),
+                                    ),
+                                  ),
+                                ),
+                              
+                              // Card atual (draggable)
+                              Positioned.fill(
+                                child: DraggableSwipeCard(
+                                  controller: _cardController,
+                                  onSwipe: (direction) => _onCardSwiped(direction, users),
+                                  child: SwipeCard(user: users[_currentIndex]),
+                                ),
+                              ),
+                            ],
+                          ),
+                  ),
                 ),
               ),
               
@@ -224,12 +308,9 @@ class _SwipeScreenState extends ConsumerState<SwipeScreen> {
                       icon: Icons.close,
                       color: AppColors.nope,
                       size: 60,
-                      onPressed: () {
-                        _swiperController.previous();
-                        if (users.isNotEmpty) {
-                          _handleSwipe(users[_swiperController.index ?? 0], 'nope');
-                        }
-                      },
+                      onPressed: _currentIndex < users.length
+                          ? () => _cardController.nope()
+                          : null,
                     ),
                     
                     // Super Like Button
@@ -237,12 +318,9 @@ class _SwipeScreenState extends ConsumerState<SwipeScreen> {
                       icon: Icons.star,
                       color: AppColors.superLike,
                       size: 50,
-                      onPressed: () {
-                        _swiperController.next();
-                        if (users.isNotEmpty) {
-                          _handleSwipe(users[_swiperController.index ?? 0], 'super_like');
-                        }
-                      },
+                      onPressed: _currentIndex < users.length
+                          ? () => _cardController.superLike()
+                          : null,
                     ),
                     
                     // Like Button
@@ -250,12 +328,9 @@ class _SwipeScreenState extends ConsumerState<SwipeScreen> {
                       icon: Icons.favorite,
                       color: AppColors.like,
                       size: 70,
-                      onPressed: () {
-                        _swiperController.next();
-                        if (users.isNotEmpty) {
-                          _handleSwipe(users[_swiperController.index ?? 0], 'like');
-                        }
-                      },
+                      onPressed: _currentIndex < users.length
+                          ? () => _cardController.like()
+                          : null,
                     ),
                   ],
                 ),
@@ -278,7 +353,7 @@ class _ActionButton extends StatelessWidget {
   final IconData icon;
   final Color color;
   final double size;
-  final VoidCallback onPressed;
+  final VoidCallback? onPressed; // Agora nullable
 
   const _ActionButton({
     required this.icon,
@@ -289,19 +364,23 @@ class _ActionButton extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final isEnabled = onPressed != null;
+    
     return Container(
       width: size,
       height: size,
       decoration: BoxDecoration(
         color: Colors.white,
         shape: BoxShape.circle,
-        boxShadow: [
-          BoxShadow(
-            color: color.withOpacity(0.3),
-            blurRadius: 20,
-            offset: const Offset(0, 5),
-          ),
-        ],
+        boxShadow: isEnabled
+            ? [
+                BoxShadow(
+                  color: color.withOpacity(0.3),
+                  blurRadius: 20,
+                  offset: const Offset(0, 5),
+                ),
+              ]
+            : [],
       ),
       child: Material(
         color: Colors.transparent,
@@ -310,7 +389,7 @@ class _ActionButton extends StatelessWidget {
           customBorder: const CircleBorder(),
           child: Icon(
             icon,
-            color: color,
+            color: isEnabled ? color : AppColors.textHint,
             size: size * 0.5,
           ),
         ),
