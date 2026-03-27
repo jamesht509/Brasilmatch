@@ -4,17 +4,32 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_dotenv/flutter_dotenv.dart';
 import 'package:supabase_flutter/supabase_flutter.dart';
 import 'app.dart';
+import 'core/config/app_config.dart';
 
 void main() async {
   WidgetsFlutterBinding.ensureInitialized();
   
-  // Load environment variables
-  await dotenv.load(fileName: ".env");
+  // Load environment variables (apenas em desenvolvimento)
+  // Em produção, usa dart-define
+  try {
+    await dotenv.load(fileName: ".env");
+  } catch (e) {
+    // .env não existe em produção, OK
+    print('ℹ️  Rodando sem .env (produção)');
+  }
+  
+  // Valida configuração
+  if (!AppConfig.validate()) {
+    throw Exception('Configuração inválida! Verifique suas credenciais.');
+  }
+  
+  // Print config (apenas desenvolvimento)
+  AppConfig.printConfig();
   
   // Initialize Supabase
   await Supabase.initialize(
-    url: dotenv.env['SUPABASE_URL']!,
-    anonKey: dotenv.env['SUPABASE_ANON_KEY']!,
+    url: AppConfig.supabaseUrl,
+    anonKey: AppConfig.supabaseAnonKey,
   );
   
   // Set system UI overlay style
