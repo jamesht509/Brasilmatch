@@ -83,7 +83,7 @@ class _SwipeScreenState extends ConsumerState<SwipeScreen> {
                   fontSize: 32,
                   fontWeight: FontWeight.bold,
                   color: Colors.white,
-                  fontFamily: 'Poppins',
+                  
                 ),
               ),
               const SizedBox(height: 8),
@@ -92,7 +92,7 @@ class _SwipeScreenState extends ConsumerState<SwipeScreen> {
                 style: const TextStyle(
                   fontSize: 16,
                   color: Colors.white,
-                  fontFamily: 'Poppins',
+                  
                 ),
                 textAlign: TextAlign.center,
               ),

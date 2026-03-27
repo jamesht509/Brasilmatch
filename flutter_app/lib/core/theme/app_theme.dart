@@ -33,7 +33,6 @@ class AppTheme {
         foregroundColor: AppColors.textPrimary,
         systemOverlayStyle: SystemUiOverlayStyle.dark,
         titleTextStyle: TextStyle(
-          fontFamily: 'Poppins',
           fontSize: 20,
           fontWeight: FontWeight.w600,
           color: AppColors.textPrimary,
@@ -43,97 +42,82 @@ class AppTheme {
       // Text Theme
       textTheme: const TextTheme(
         displayLarge: TextStyle(
-          fontFamily: 'Poppins',
           fontSize: 32,
           fontWeight: FontWeight.bold,
           color: AppColors.textPrimary,
           height: 1.2,
         ),
         displayMedium: TextStyle(
-          fontFamily: 'Poppins',
           fontSize: 28,
           fontWeight: FontWeight.bold,
           color: AppColors.textPrimary,
           height: 1.2,
         ),
         displaySmall: TextStyle(
-          fontFamily: 'Poppins',
           fontSize: 24,
           fontWeight: FontWeight.w600,
           color: AppColors.textPrimary,
           height: 1.3,
         ),
         headlineLarge: TextStyle(
-          fontFamily: 'Poppins',
           fontSize: 22,
           fontWeight: FontWeight.w600,
           color: AppColors.textPrimary,
         ),
         headlineMedium: TextStyle(
-          fontFamily: 'Poppins',
           fontSize: 20,
           fontWeight: FontWeight.w600,
           color: AppColors.textPrimary,
         ),
         headlineSmall: TextStyle(
-          fontFamily: 'Poppins',
           fontSize: 18,
           fontWeight: FontWeight.w600,
           color: AppColors.textPrimary,
         ),
         titleLarge: TextStyle(
-          fontFamily: 'Poppins',
           fontSize: 16,
           fontWeight: FontWeight.w600,
           color: AppColors.textPrimary,
         ),
         titleMedium: TextStyle(
-          fontFamily: 'Poppins',
           fontSize: 14,
           fontWeight: FontWeight.w500,
           color: AppColors.textPrimary,
         ),
         titleSmall: TextStyle(
-          fontFamily: 'Poppins',
           fontSize: 12,
           fontWeight: FontWeight.w500,
           color: AppColors.textPrimary,
         ),
         bodyLarge: TextStyle(
-          fontFamily: 'Poppins',
           fontSize: 16,
           fontWeight: FontWeight.normal,
           color: AppColors.textPrimary,
           height: 1.5,
         ),
         bodyMedium: TextStyle(
-          fontFamily: 'Poppins',
           fontSize: 14,
           fontWeight: FontWeight.normal,
           color: AppColors.textPrimary,
           height: 1.5,
         ),
         bodySmall: TextStyle(
-          fontFamily: 'Poppins',
           fontSize: 12,
           fontWeight: FontWeight.normal,
           color: AppColors.textSecondary,
           height: 1.4,
         ),
         labelLarge: TextStyle(
-          fontFamily: 'Poppins',
           fontSize: 14,
           fontWeight: FontWeight.w500,
           color: AppColors.textPrimary,
         ),
         labelMedium: TextStyle(
-          fontFamily: 'Poppins',
           fontSize: 12,
           fontWeight: FontWeight.w500,
           color: AppColors.textSecondary,
         ),
         labelSmall: TextStyle(
-          fontFamily: 'Poppins',
           fontSize: 10,
           fontWeight: FontWeight.w500,
           color: AppColors.textHint,
@@ -152,7 +136,6 @@ class AppTheme {
             borderRadius: BorderRadius.circular(16),
           ),
           textStyle: const TextStyle(
-            fontFamily: 'Poppins',
             fontSize: 16,
             fontWeight: FontWeight.w600,
           ),
@@ -164,7 +147,6 @@ class AppTheme {
         style: TextButton.styleFrom(
           foregroundColor: AppColors.primary,
           textStyle: const TextStyle(
-            fontFamily: 'Poppins',
             fontSize: 14,
             fontWeight: FontWeight.w600,
           ),
@@ -197,7 +179,6 @@ class AppTheme {
           borderSide: const BorderSide(color: AppColors.error, width: 2),
         ),
         hintStyle: TextStyle(
-          fontFamily: 'Poppins',
           fontSize: 14,
           color: AppColors.textHint,
         ),
@@ -221,12 +202,10 @@ class AppTheme {
         type: BottomNavigationBarType.fixed,
         elevation: 8,
         selectedLabelStyle: TextStyle(
-          fontFamily: 'Poppins',
           fontSize: 12,
           fontWeight: FontWeight.w600,
         ),
         unselectedLabelStyle: TextStyle(
-          fontFamily: 'Poppins',
           fontSize: 12,
           fontWeight: FontWeight.normal,
         ),

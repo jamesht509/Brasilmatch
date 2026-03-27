@@ -92,7 +92,7 @@ class _SplashScreenState extends State<SplashScreen> with SingleTickerProviderSt
                       fontSize: 36,
                       fontWeight: FontWeight.bold,
                       color: Colors.white,
-                      fontFamily: 'Poppins',
+                      
                     ),
                   ),
                   const SizedBox(height: 10),
@@ -103,7 +103,7 @@ class _SplashScreenState extends State<SplashScreen> with SingleTickerProviderSt
                     style: TextStyle(
                       fontSize: 16,
                       color: Colors.white.withOpacity(0.9),
-                      fontFamily: 'Poppins',
+                      
                     ),
                   ),
                 ],

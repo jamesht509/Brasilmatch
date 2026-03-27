@@ -150,7 +150,7 @@ class ProfileScreen extends ConsumerWidget {
                                 color: Colors.white,
                                 fontSize: 32,
                                 fontWeight: FontWeight.bold,
-                                fontFamily: 'Poppins',
+                                
                               ),
                             ),
                           ],

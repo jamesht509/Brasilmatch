@@ -191,7 +191,7 @@ class _MatchCardState extends ConsumerState<_MatchCard> {
                           fontSize: 18,
                           fontWeight: FontWeight.bold,
                           color: Colors.white,
-                          fontFamily: 'Poppins',
+                          
                         ),
                         maxLines: 1,
                         overflow: TextOverflow.ellipsis,
@@ -211,7 +211,7 @@ class _MatchCardState extends ConsumerState<_MatchCard> {
                               style: const TextStyle(
                                 fontSize: 12,
                                 color: Colors.white,
-                                fontFamily: 'Poppins',
+                                
                               ),
                               maxLines: 1,
                               overflow: TextOverflow.ellipsis,

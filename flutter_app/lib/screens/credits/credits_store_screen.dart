@@ -44,7 +44,7 @@ class CreditsStoreScreen extends ConsumerWidget {
                       color: Colors.white,
                       fontSize: 48,
                       fontWeight: FontWeight.bold,
-                      fontFamily: 'Poppins',
+                      
                     ),
                   ),
                   const Text(
@@ -295,7 +295,7 @@ class _CreditPackage extends StatelessWidget {
                           style: const TextStyle(
                             fontSize: 32,
                             fontWeight: FontWeight.bold,
-                            fontFamily: 'Poppins',
+                            
                           ),
                         ),
                         const SizedBox(width: 8),

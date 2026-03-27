@@ -42,7 +42,7 @@ class SwipeService {
       var query = _supabase
           .from('users')
           .select()
-          .not('id', 'in', excludeIds);
+          .not('id', 'in', '(${excludeIds.join(',')})');
 
       // Filter by gender preferences
       if (preferences.interestedIn != 'both') {
@@ -89,11 +89,14 @@ class SwipeService {
   /// Check if two users matched (automatic via trigger)
   Future<bool> checkMatch(String user1Id, String user2Id) async {
     try {
+      // Sort IDs alphabetically to match database structure
+      final sortedIds = [user1Id, user2Id]..sort();
+      
       final response = await _supabase
           .from('matches')
           .select()
-          .eq('user1_id', user1Id < user2Id ? user1Id : user2Id)
-          .eq('user2_id', user1Id < user2Id ? user2Id : user1Id)
+          .eq('user1_id', sortedIds[0])
+          .eq('user2_id', sortedIds[1])
           .maybeSingle();
 
       return response != null;

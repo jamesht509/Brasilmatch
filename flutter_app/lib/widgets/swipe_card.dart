@@ -84,7 +84,7 @@ class SwipeCard extends StatelessWidget {
                               fontSize: 28,
                               fontWeight: FontWeight.bold,
                               color: Colors.white,
-                              fontFamily: 'Poppins',
+                              
                             ),
                           ),
                         ),
@@ -120,7 +120,7 @@ class SwipeCard extends StatelessWidget {
                           style: const TextStyle(
                             fontSize: 16,
                             color: Colors.white,
-                            fontFamily: 'Poppins',
+                            
                           ),
                         ),
                       ],
@@ -141,7 +141,7 @@ class SwipeCard extends StatelessWidget {
                           style: TextStyle(
                             fontSize: 14,
                             color: Colors.white.withOpacity(0.9),
-                            fontFamily: 'Poppins',
+                            
                           ),
                         ),
                       ],
@@ -154,7 +154,7 @@ class SwipeCard extends StatelessWidget {
                         style: TextStyle(
                           fontSize: 14,
                           color: Colors.white.withOpacity(0.9),
-                          fontFamily: 'Poppins',
+                          
                           height: 1.5,
                         ),
                         maxLines: 3,

@@ -53,11 +53,11 @@ class _HomeScreenState extends State<HomeScreen> {
           selectedFontSize: 12,
           unselectedFontSize: 12,
           selectedLabelStyle: const TextStyle(
-            fontFamily: 'Poppins',
+            
             fontWeight: FontWeight.w600,
           ),
           unselectedLabelStyle: const TextStyle(
-            fontFamily: 'Poppins',
+            
             fontWeight: FontWeight.normal,
           ),
           items: const [
