@@ -2,9 +2,11 @@ import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
 import 'package:image_picker/image_picker.dart';
+import 'package:cached_network_image/cached_network_image.dart';
 import '../../core/theme/app_colors.dart';
 import '../../models/user_model.dart';
 import '../../providers/auth_provider.dart';
+import '../../services/supabase/storage_service.dart';
 import '../../widgets/custom_button.dart';
 import '../../widgets/custom_text_field.dart';
 
@@ -27,9 +29,12 @@ class _ProfileSetupScreenState extends ConsumerState<ProfileSetupScreen> {
   
   String _selectedGender = 'male';
   String _selectedInterestedIn = 'female';
-  List<String> _photos = [];
+  List<String> _photos = []; // Agora armazena URLs do Supabase, não paths locais
   
   final ImagePicker _picker = ImagePicker();
+  final StorageService _storageService = StorageService();
+  
+  bool _isUploadingPhoto = false; // Estado de loading para upload
 
   @override
   void dispose() {
@@ -44,6 +49,7 @@ class _ProfileSetupScreenState extends ConsumerState<ProfileSetupScreen> {
   }
 
   Future<void> _pickImage() async {
+    // Verificar limite de fotos
     if (_photos.length >= 6) {
       ScaffoldMessenger.of(context).showSnackBar(
         const SnackBar(
@@ -54,6 +60,7 @@ class _ProfileSetupScreenState extends ConsumerState<ProfileSetupScreen> {
       return;
     }
 
+    // PASSO 1: Escolher imagem da galeria
     final XFile? image = await _picker.pickImage(
       source: ImageSource.gallery,
       maxWidth: 1024,
@@ -61,12 +68,66 @@ class _ProfileSetupScreenState extends ConsumerState<ProfileSetupScreen> {
       imageQuality: 85,
     );
 
-    if (image != null) {
-      // TODO: Upload to Supabase Storage and get URL
-      // Por enquanto, usar path local
+    if (image == null) return; // Usuário cancelou
+    
+    // PASSO 2: Pegar ID do usuário autenticado
+    final authState = ref.read(authProvider);
+    if (authState.authUser == null) {
+      if (mounted) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          const SnackBar(
+            content: Text('Erro: usuário não autenticado'),
+            backgroundColor: AppColors.error,
+          ),
+        );
+      }
+      return;
+    }
+    
+    final userId = authState.authUser!.id;
+    
+    // PASSO 3: Mostrar loading
+    setState(() {
+      _isUploadingPhoto = true;
+    });
+    
+    // PASSO 4: Fazer upload real para Supabase Storage
+    final photoUrl = await _storageService.uploadProfilePhoto(
+      filePath: image.path,
+      userId: userId,
+    );
+    
+    // PASSO 5: Esconder loading
+    setState(() {
+      _isUploadingPhoto = false;
+    });
+    
+    // PASSO 6: Verificar resultado
+    if (photoUrl != null) {
+      // Sucesso! Adicionar URL à lista
       setState(() {
-        _photos.add(image.path);
+        _photos.add(photoUrl);
       });
+      
+      if (mounted) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          const SnackBar(
+            content: Text('✅ Foto adicionada!'),
+            backgroundColor: AppColors.success,
+            duration: Duration(seconds: 2),
+          ),
+        );
+      }
+    } else {
+      // Erro no upload
+      if (mounted) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          const SnackBar(
+            content: Text('❌ Erro ao fazer upload. Tente novamente.'),
+            backgroundColor: AppColors.error,
+          ),
+        );
+      }
     }
   }
 
@@ -155,7 +216,10 @@ class _ProfileSetupScreenState extends ConsumerState<ProfileSetupScreen> {
                     itemCount: _photos.length + 1,
                     itemBuilder: (context, index) {
                       if (index == _photos.length) {
-                        return _AddPhotoButton(onTap: _pickImage);
+                        return _AddPhotoButton(
+                          onTap: _pickImage,
+                          isLoading: _isUploadingPhoto,
+                        );
                       }
                       return _PhotoThumbnail(
                         path: _photos[index],
@@ -392,13 +456,17 @@ class _ProfileSetupScreenState extends ConsumerState<ProfileSetupScreen> {
 
 class _AddPhotoButton extends StatelessWidget {
   final VoidCallback onTap;
+  final bool isLoading;
 
-  const _AddPhotoButton({required this.onTap});
+  const _AddPhotoButton({
+    required this.onTap,
+    this.isLoading = false,
+  });
 
   @override
   Widget build(BuildContext context) {
     return GestureDetector(
-      onTap: onTap,
+      onTap: isLoading ? null : onTap, // Desabilitar durante loading
       child: Container(
         width: 120,
         margin: const EdgeInsets.only(right: 12),
@@ -406,29 +474,35 @@ class _AddPhotoButton extends StatelessWidget {
           color: AppColors.surfaceVariant,
           borderRadius: BorderRadius.circular(16),
           border: Border.all(
-            color: AppColors.primary,
+            color: isLoading ? AppColors.textHint : AppColors.primary,
             width: 2,
             style: BorderStyle.solid,
           ),
         ),
-        child: const Column(
-          mainAxisAlignment: MainAxisAlignment.center,
-          children: [
-            Icon(
-              Icons.add_photo_alternate,
-              size: 40,
-              color: AppColors.primary,
-            ),
-            SizedBox(height: 8),
-            Text(
-              'Adicionar',
-              style: TextStyle(
-                color: AppColors.primary,
-                fontWeight: FontWeight.w600,
+        child: isLoading
+            ? const Center(
+                child: CircularProgressIndicator(
+                  color: AppColors.primary,
+                ),
+              )
+            : const Column(
+                mainAxisAlignment: MainAxisAlignment.center,
+                children: [
+                  Icon(
+                    Icons.add_photo_alternate,
+                    size: 40,
+                    color: AppColors.primary,
+                  ),
+                  SizedBox(height: 8),
+                  Text(
+                    'Adicionar',
+                    style: TextStyle(
+                      color: AppColors.primary,
+                      fontWeight: FontWeight.w600,
+                    ),
+                  ),
+                ],
               ),
-            ),
-          ],
-        ),
       ),
     );
   }
@@ -456,17 +530,28 @@ class _PhotoThumbnail extends StatelessWidget {
         children: [
           ClipRRect(
             borderRadius: BorderRadius.circular(16),
-            child: Image.network(
-              path,
+            child: CachedNetworkImage(
+              imageUrl: path,
               width: 120,
               height: 120,
               fit: BoxFit.cover,
-              errorBuilder: (context, error, stackTrace) {
-                return Container(
-                  color: AppColors.surfaceVariant,
-                  child: const Icon(Icons.image, size: 40),
-                );
-              },
+              placeholder: (context, url) => Container(
+                color: AppColors.surfaceVariant,
+                child: const Center(
+                  child: CircularProgressIndicator(
+                    color: AppColors.primary,
+                    strokeWidth: 2,
+                  ),
+                ),
+              ),
+              errorWidget: (context, url, error) => Container(
+                color: AppColors.surfaceVariant,
+                child: const Icon(
+                  Icons.image,
+                  size: 40,
+                  color: AppColors.textHint,
+                ),
+              ),
             ),
           ),
           Positioned(
